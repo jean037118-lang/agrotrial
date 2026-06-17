@@ -1,0 +1,19 @@
+{
+  "name": "AgroTrial CRM",
+  "short_name": "AgroTrial",
+  "description": "Gestão de clientes, vendas, toneladas e comissões para vendedores de gesso agrícola.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#1a3c2a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

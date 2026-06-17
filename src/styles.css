@@ -1,0 +1,164 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* AgroTrial CRM — Campo & Terra design system */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-earth: var(--earth);
+  --color-earth-foreground: var(--earth-foreground);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-display: "Inter", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+:root {
+  --radius: 0.75rem;
+
+  /* Modern Enterprise: slate canvas + deep forest sidebar + emerald accents + earth CTA */
+  --background: oklch(0.985 0.005 250);         /* slate-50 */
+  --foreground: oklch(0.21 0.04 265);           /* slate-900 */
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.04 265);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.04 265);
+
+  --primary: oklch(0.55 0.15 155);              /* emerald-600 */
+  --primary-foreground: oklch(0.99 0 0);
+
+  --secondary: oklch(0.96 0.008 250);           /* slate-100 */
+  --secondary-foreground: oklch(0.28 0.04 265);
+
+  --muted: oklch(0.96 0.008 250);
+  --muted-foreground: oklch(0.55 0.025 260);    /* slate-500 */
+
+  --accent: oklch(0.96 0.008 250);
+  --accent-foreground: oklch(0.28 0.04 265);
+
+  --destructive: oklch(0.6 0.22 25);
+  --destructive-foreground: oklch(0.99 0 0);
+
+  --earth: oklch(0.45 0.1 50);                  /* #8B4513 saddle brown */
+  --earth-foreground: oklch(0.99 0 0);
+
+  --gold: oklch(0.78 0.13 80);
+  --gold-foreground: oklch(0.22 0.04 145);
+
+  --success: oklch(0.6 0.14 155);
+  --success-foreground: oklch(0.99 0 0);
+
+  --border: oklch(0.92 0.008 250);              /* slate-200 */
+  --input: oklch(0.92 0.008 250);
+  --ring: oklch(0.55 0.15 155);
+
+  --sidebar: oklch(0.21 0.04 155);              /* #0B1E10 deep forest */
+  --sidebar-foreground: oklch(0.78 0.015 250);  /* slate-300 */
+  --sidebar-primary: oklch(0.55 0.15 155);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.32 0.06 155 / 0.4); /* emerald-900/40 */
+  --sidebar-accent-foreground: oklch(0.99 0 0);
+  --sidebar-border: oklch(1 0 0 / 0.06);
+  --sidebar-ring: oklch(0.55 0.15 155);
+}
+
+.dark {
+  --background: oklch(0.18 0.03 145);
+  --foreground: oklch(0.96 0.015 80);
+  --card: oklch(0.22 0.04 145);
+  --card-foreground: oklch(0.96 0.015 80);
+  --popover: oklch(0.22 0.04 145);
+  --popover-foreground: oklch(0.96 0.015 80);
+  --primary: oklch(0.78 0.13 80);
+  --primary-foreground: oklch(0.22 0.04 145);
+  --secondary: oklch(0.32 0.07 145);
+  --secondary-foreground: oklch(0.96 0.015 80);
+  --muted: oklch(0.28 0.04 145);
+  --muted-foreground: oklch(0.72 0.02 80);
+  --accent: oklch(0.28 0.04 145);
+  --accent-foreground: oklch(0.96 0.015 80);
+  --destructive: oklch(0.65 0.22 28);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.78 0.13 80);
+  --earth: oklch(0.62 0.14 45);
+  --earth-foreground: oklch(0.98 0 0);
+  --gold: oklch(0.82 0.14 80);
+  --gold-foreground: oklch(0.22 0.04 145);
+  --success: oklch(0.65 0.14 150);
+  --success-foreground: oklch(0.18 0.03 145);
+  --sidebar: oklch(0.14 0.03 145);
+  --sidebar-foreground: oklch(0.92 0.02 80);
+  --sidebar-primary: oklch(0.62 0.14 45);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.22 0.04 145);
+  --sidebar-accent-foreground: oklch(0.96 0.015 80);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.62 0.14 45);
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html, body { font-family: var(--font-sans); }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+}
+
+
+@utility gradient-earth {
+  background-image: linear-gradient(135deg, var(--color-primary), var(--color-earth));
+}
+@utility gradient-field {
+  background-image: linear-gradient(160deg, oklch(0.32 0.06 155), oklch(0.21 0.04 155));
+}
