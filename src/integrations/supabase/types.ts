@@ -7,8 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -155,6 +153,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          // ── Campos originais ──────────────────────────────────────────
           commission_per_ton: number
           created_at: string
           full_name: string | null
@@ -162,6 +161,13 @@ export type Database = {
           monthly_goal_tons: number
           recall_days: number
           updated_at: string
+          // ── Campos novos (RBAC) ───────────────────────────────────────
+          /** Papel do usuário no sistema: 'admin' | 'vendedor' */
+          role: "admin" | "vendedor"
+          /** Indica se o usuário está ativo. Admin pode inativar vendedores. */
+          active: boolean
+          /** E-mail espelhado de auth.users para exibição no painel admin. */
+          email: string | null
         }
         Insert: {
           commission_per_ton?: number
@@ -171,6 +177,9 @@ export type Database = {
           monthly_goal_tons?: number
           recall_days?: number
           updated_at?: string
+          role?: "admin" | "vendedor"
+          active?: boolean
+          email?: string | null
         }
         Update: {
           commission_per_ton?: number
@@ -180,6 +189,9 @@ export type Database = {
           monthly_goal_tons?: number
           recall_days?: number
           updated_at?: string
+          role?: "admin" | "vendedor"
+          active?: boolean
+          email?: string | null
         }
         Relationships: []
       }
@@ -244,10 +256,54 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_sales_summary: {
+        Row: {
+          vendor_id: string
+          vendor_name: string | null
+          vendor_email: string | null
+          commission_per_ton: number
+          monthly_goal_tons: number
+          active: boolean
+          total_sales: number
+          total_tons: number
+          total_commission: number
+          month_tons: number
+          month_commission: number
+          year_tons: number
+          total_clients: number
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      admin_create_user: {
+        Args: {
+          p_email: string
+          p_password: string
+          p_full_name: string
+          p_role?: string
+          p_commission?: number
+          p_monthly_goal?: number
+          p_recall_days?: number
+        }
+        Returns: Json
+      }
+      admin_update_user: {
+        Args: {
+          p_user_id: string
+          p_full_name?: string
+          p_role?: string
+          p_commission?: number
+          p_monthly_goal?: number
+          p_recall_days?: number
+          p_active?: boolean
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -372,7 +428,7 @@ export type CompositeTypes<
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    ? DefaultSchema["CompositeTypes\"][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {

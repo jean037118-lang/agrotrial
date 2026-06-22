@@ -37,7 +37,7 @@ export type Sale = {
   product: string;
   product_id: string | null;
   unit: string;
-  tons: number;       // mantido para compatibilidade (quantidade principal)
+  tons: number;
   quantity: number | null;
   price_per_ton: number | null;
   commission_per_ton: number;
@@ -54,6 +54,13 @@ export type Profile = {
   commission_per_ton: number;
   monthly_goal_tons: number;
   recall_days: number;
+  // ── Campos RBAC ──────────────────────────────────────────────────────────
+  /** Papel do usuário: 'admin' | 'vendedor' */
+  role: "admin" | "vendedor";
+  /** Indica se o usuário está ativo no sistema */
+  active: boolean;
+  /** E-mail do usuário (espelhado de auth.users) */
+  email: string | null;
 };
 
 export type FutureSale = {
@@ -74,6 +81,45 @@ export type AgendaTask = {
   due_date: string;
   done: boolean;
   notes: string | null;
+};
+
+/** Interação registrada no histórico do cliente (timeline do CRM). */
+export type Interaction = {
+  id: string;
+  vendor_id: string;
+  client_id: string;
+  type: InteractionType;
+  notes: string | null;
+  occurred_at: string;
+  created_at: string;
+};
+
+export type InteractionType =
+  | "ligacao" | "whatsapp" | "visita" | "reuniao"
+  | "proposta" | "venda" | "pos_venda" | "email" | "outro";
+
+export const INTERACTION_LABEL: Record<InteractionType, string> = {
+  ligacao: "Ligação",
+  whatsapp: "WhatsApp",
+  visita: "Visita",
+  reuniao: "Reunião",
+  proposta: "Proposta",
+  venda: "Venda",
+  pos_venda: "Pós-venda",
+  email: "E-mail",
+  outro: "Outro",
+};
+
+export const INTERACTION_COLOR: Record<InteractionType, string> = {
+  ligacao: "bg-blue-100 text-blue-700",
+  whatsapp: "bg-emerald-100 text-emerald-700",
+  visita: "bg-purple-100 text-purple-700",
+  reuniao: "bg-indigo-100 text-indigo-700",
+  proposta: "bg-amber-100 text-amber-700",
+  venda: "bg-primary/15 text-primary",
+  pos_venda: "bg-teal-100 text-teal-700",
+  email: "bg-slate-100 text-slate-700",
+  outro: "bg-muted text-muted-foreground",
 };
 
 export const UNIT_LABEL: Record<string, string> = {
@@ -121,7 +167,10 @@ export const qty = (v: number, unit: string) => {
 };
 
 export async function fetchProfile(): Promise<Profile | null> {
-  const { data } = await supabase.from("profiles").select("*").maybeSingle();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, role, active, commission_per_ton, monthly_goal_tons, recall_days")
+    .maybeSingle();
   return (data as Profile) ?? null;
 }
 
@@ -158,6 +207,24 @@ export async function fetchAgenda(): Promise<AgendaTask[]> {
     .from("agenda_tasks").select("*").order("due_date", { ascending: true });
   if (error) throw error;
   return (data ?? []) as AgendaTask[];
+}
+
+/** Busca todas as interações (todos os clientes), mais recentes primeiro. */
+export async function fetchInteractions(): Promise<Interaction[]> {
+  const { data, error } = await supabase
+    .from("interactions").select("*").order("occurred_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Interaction[];
+}
+
+/** Busca interações de um cliente específico, mais recentes primeiro. */
+export async function fetchClientInteractions(clientId: string): Promise<Interaction[]> {
+  const { data, error } = await supabase
+    .from("interactions").select("*")
+    .eq("client_id", clientId)
+    .order("occurred_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Interaction[];
 }
 
 /** Calcula comissão de um produto dado quantidade e preço */

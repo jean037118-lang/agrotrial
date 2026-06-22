@@ -1,27 +1,44 @@
+/**
+ * index.tsx
+ * Landing page do AgroTrial.
+ *
+ * Alterações RBAC (Etapa 3):
+ *   - Se já há sessão ativa, redireciona para a rota correta por role
+ *     (admin → /admin/dashboard, vendedor → /dashboard)
+ *   - Antes redirecionava sempre para /dashboard
+ */
+
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sprout, TrendingUp, Wallet, Users, MapPin, BellRing } from "lucide-react";
+import { fetchAuthProfile, getHomeRouteForRole } from "@/lib/auth";
 
 export const Route = createFileRoute("/")({
   component: Landing,
 });
 
 const features = [
-  { icon: Users, title: "Cadastro completo", desc: "Cliente, fazenda, cultura, potencial e histórico." },
-  { icon: Wallet, title: "Comissão automática", desc: "Toneladas × R$ por tonelada, calculado na hora." },
-  { icon: BellRing, title: "Recompra inteligente", desc: "Sistema avisa quando é hora de ligar de novo." },
-  { icon: TrendingUp, title: "Funil & previsão", desc: "Lead → venda, com previsão de toneladas futuras." },
-  { icon: MapPin, title: "Mapa de clientes", desc: "Visualize sua carteira em campo." },
-  { icon: Sprout, title: "Meta & ranking", desc: "Acompanhe meta mensal e top compradores." },
+  { icon: Users,    title: "Cadastro completo",   desc: "Cliente, fazenda, cultura, potencial e histórico." },
+  { icon: Wallet,   title: "Comissão automática", desc: "Toneladas × R$ por tonelada, calculado na hora." },
+  { icon: BellRing, title: "Recompra inteligente",desc: "Sistema avisa quando é hora de ligar de novo." },
+  { icon: TrendingUp,title:"Funil & previsão",    desc: "Lead → venda, com previsão de toneladas futuras." },
+  { icon: MapPin,   title: "Mapa de clientes",    desc: "Visualize sua carteira em campo." },
+  { icon: Sprout,   title: "Meta & ranking",      desc: "Acompanhe meta mensal e top compradores." },
 ];
 
 function Landing() {
   const navigate = useNavigate();
 
+  // Redireciona sessão ativa para a rota correta conforme role
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard" });
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!data.session) return;
+
+      const profile = await fetchAuthProfile();
+      if (!profile || !profile.active) return;
+
+      navigate({ to: getHomeRouteForRole(profile.role), replace: true });
     });
   }, [navigate]);
 
@@ -115,7 +132,10 @@ function Landing() {
             </p>
             <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {features.map((f) => (
-                <div key={f.title} className="rounded-2xl border border-border bg-card p-6 transition hover:border-earth/60 hover:shadow-md">
+                <div
+                  key={f.title}
+                  className="rounded-2xl border border-border bg-card p-6 transition hover:border-earth/60 hover:shadow-md"
+                >
                   <div className="grid h-10 w-10 place-items-center rounded-lg bg-accent text-earth">
                     <f.icon className="h-5 w-5" />
                   </div>

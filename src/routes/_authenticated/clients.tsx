@@ -7,6 +7,7 @@ import {
   type Client, type Sale,
 } from "@/lib/agro";
 import { ClientsMap } from "@/components/ClientsMap";
+import { ClientHistory } from "@/components/ClientHistory";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +22,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   Plus, Search, MapPin, Phone, MessageCircle, Wheat, Trash2,
-  List, Map as LucideMapIcon, Pencil, User,
+  List, Map as LucideMapIcon, Pencil, User, History,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -49,6 +50,7 @@ function ClientsPage() {
   const [query, setQuery] = useState("");
   const [openNew, setOpenNew] = useState(false);
   const [editClient, setEditClient] = useState<Client | null>(null);
+  const [historyClient, setHistoryClient] = useState<Client | null>(null);
   const [view, setView] = useState<"lista" | "mapa">("lista");
   const [stateFilter, setStateFilter] = useState(TODOS);
   const [cityFilter, setCityFilter] = useState(TODOS);
@@ -208,7 +210,11 @@ function ClientsPage() {
             const topList = Object.entries(topProducts).sort((a, b) => b[1] - a[1]).slice(0, 3);
 
             return (
-              <Card key={c.id} className="overflow-hidden transition-shadow hover:shadow-md">
+              <Card
+                key={c.id}
+                className="overflow-hidden transition-shadow hover:shadow-md cursor-pointer"
+                onClick={() => setHistoryClient(c)}
+              >
                 <CardContent className="p-5">
                   {/* Cabeçalho */}
                   <div className="flex items-start justify-between gap-3">
@@ -224,7 +230,10 @@ function ClientsPage() {
                         <p className="truncate text-sm text-muted-foreground">{c.farm ?? "—"}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" onClick={() => setHistoryClient(c)} aria-label="Histórico" title="Ver histórico">
+                        <History className="h-4 w-4 text-muted-foreground" />
+                      </Button>
                       <Button variant="ghost" size="icon" onClick={() => setEditClient(c)} aria-label="Editar">
                         <Pencil className="h-4 w-4 text-muted-foreground" />
                       </Button>
@@ -242,6 +251,7 @@ function ClientsPage() {
                     {c.whatsapp ? (
                       <a href={`https://wa.me/${c.whatsapp.replace(/\D/g, "")}`}
                         target="_blank" rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
                         className="flex items-center gap-1.5 text-success hover:underline">
                         <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
                       </a>
@@ -291,6 +301,13 @@ function ClientsPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Painel de histórico/timeline */}
+      <ClientHistory
+        client={historyClient}
+        sales={sales as Sale[]}
+        onClose={() => setHistoryClient(null)}
+      />
     </div>
   );
 }
@@ -339,7 +356,6 @@ function ClientForm({ initial, onDone }: { initial: Client | null; onDone: () =>
       if (error) return toast.error(error.message);
       toast.success("Cliente atualizado.");
     } else {
-      // Geocoding automático
       let lat: number | null = null;
       let lng: number | null = null;
       if (form.city || form.state) {

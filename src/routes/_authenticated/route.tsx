@@ -1,29 +1,70 @@
-import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router";
+/**
+ * _authenticated/route.tsx
+ * Layout raiz das rotas de vendedor (dashboard, clientes, vendas, agenda…).
+ *
+ * Alterações RBAC (Etapa 3):
+ *   - beforeLoad agora verifica role além de sessão
+ *   - Se o usuário logado for admin → redireciona para /admin/dashboard
+ *   - Se o usuário estiver inativo   → redireciona para /auth
+ *   - Vendedor ativo → acesso normal (comportamento anterior mantido)
+ */
+
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useRouterState,
+} from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAuthProfile } from "@/lib/auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
+    // 1. Verifica se há sessão ativa
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
-    return { user: data.user };
+
+    // 2. Busca perfil com role
+    const profile = await fetchAuthProfile();
+
+    // 3. Sem perfil (raro — trigger pode ter falhado)
+    if (!profile) throw redirect({ to: "/auth" });
+
+    // 4. Usuário inativo → bloqueia acesso
+    if (!profile.active) {
+      await supabase.auth.signOut();
+      throw redirect({ to: "/auth" });
+    }
+
+    // 5. Admin não acessa rotas de vendedor → redireciona para painel admin
+    if (profile.role === "admin") {
+      throw redirect({ to: "/admin/dashboard" });
+    }
+
+    // 6. Vendedor ativo → passa o user e profile para o contexto da rota
+    return { user: data.user, profile };
   },
   component: AuthedLayout,
 });
 
+// ─── Mapa de títulos por rota ─────────────────────────────────────────────────
+
 const TITLES: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/clients": "Clientes",
-  "/sales": "Vendas",
-  "/future-sales": "Previsão de vendas",
-  "/agenda": "Agenda",
+  "/dashboard":         "Dashboard",
+  "/clients":           "Clientes",
+  "/sales":             "Vendas",
+  "/future-sales":      "Previsão de vendas",
+  "/agenda":            "Agenda",
   "/gypsum-calculator": "Calculadora de Gesso",
-  "/ranking": "Ranking",
-  "/reports": "Relatórios",
-  "/settings": "Configurações",
+  "/ranking":           "Ranking",
+  "/reports":           "Relatórios",
+  "/settings":          "Configurações",
 };
+
+// ─── Layout do vendedor ───────────────────────────────────────────────────────
 
 function AuthedLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });

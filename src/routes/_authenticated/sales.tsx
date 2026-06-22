@@ -343,6 +343,15 @@ function SaleForm({
     });
     setSaving(false);
     if (error) return toast.error(error.message);
+
+    // Registra automaticamente no histórico/timeline do cliente
+    await supabase.from("interactions").insert({
+      vendor_id: user.id,
+      client_id: form.client_id,
+      type: "venda",
+      notes: `${form.product} — ${quantity} ${form.unit}`,
+      occurred_at: new Date(form.sale_date + "T12:00:00").toISOString(),
+    });
     toast.success(`Venda registrada • ${brl(total_commission)} de comissão`);
     onDone();
   }
