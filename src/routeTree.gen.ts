@@ -22,13 +22,13 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 
-// CORRIGIDO: importa de _admin/route (pasta) e não de _admin.tsx (arquivo solto)
-import { Route as AdminRouteRouteImport } from './routes/_admin/route'
-import { Route as AdminDashboardRouteImport } from './routes/_admin/dashboard'
-import { Route as AdminRankingRouteImport } from './routes/_admin/ranking'
-import { Route as AdminReportsRouteImport } from './routes/_admin/reports'
-import { Route as AdminUsersRouteImport } from './routes/_admin/users'
-import { Route as AdminUsersIdRouteImport } from './routes/_admin/users.$id'
+// Admin: sem underscore — rota com caminho real /admin
+import { Route as AdminRouteImport } from './routes/admin/route'
+import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
+import { Route as AdminRankingRouteImport } from './routes/admin/ranking'
+import { Route as AdminReportsRouteImport } from './routes/admin/reports'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminUsersIdRouteImport } from './routes/admin/users.$id'
 
 // ─── Instâncias ───────────────────────────────────────────────────────────────
 
@@ -38,7 +38,6 @@ const AuthRoute = AuthRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
-// path: '' — layout pathless, igual ao _authenticated
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   path: '',
@@ -109,40 +108,40 @@ const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
 
-const AdminRouteRoute = AdminRouteRouteImport.update({
-  id: '/_admin',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
-  id: '/dashboard',
+  id: '/admin/dashboard',
   path: '/dashboard',
-  getParentRoute: () => AdminRouteRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
 
 const AdminRankingRoute = AdminRankingRouteImport.update({
-  id: '/ranking',
+  id: '/admin/ranking',
   path: '/ranking',
-  getParentRoute: () => AdminRouteRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
 
 const AdminReportsRoute = AdminReportsRouteImport.update({
-  id: '/reports',
+  id: '/admin/reports',
   path: '/reports',
-  getParentRoute: () => AdminRouteRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
 
 const AdminUsersRoute = AdminUsersRouteImport.update({
-  id: '/users',
+  id: '/admin/users',
   path: '/users',
-  getParentRoute: () => AdminRouteRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
 
 const AdminUsersIdRoute = AdminUsersIdRouteImport.update({
-  id: '/users/$id',
+  id: '/admin/users/$id',
   path: '/users/$id',
-  getParentRoute: () => AdminRouteRoute,
+  getParentRoute: () => AdminRoute,
 } as any)
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
@@ -159,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedReportsRoute
   '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/admin': typeof AdminRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/ranking': typeof AdminRankingRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -178,6 +178,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsRoute
   '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/admin': typeof AdminRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/ranking': typeof AdminRankingRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -199,12 +200,12 @@ export interface FileRoutesById {
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/sales': typeof AuthenticatedSalesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/_admin': typeof AdminRouteRouteWithChildren
-  '/_admin/dashboard': typeof AdminDashboardRoute
-  '/_admin/ranking': typeof AdminRankingRoute
-  '/_admin/reports': typeof AdminReportsRoute
-  '/_admin/users': typeof AdminUsersRoute
-  '/_admin/users/$id': typeof AdminUsersIdRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/ranking': typeof AdminRankingRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/users/$id': typeof AdminUsersIdRoute
 }
 
 export interface FileRouteTypes {
@@ -221,6 +222,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/sales'
     | '/settings'
+    | '/admin'
     | '/admin/dashboard'
     | '/admin/ranking'
     | '/admin/reports'
@@ -239,6 +241,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/sales'
     | '/settings'
+    | '/admin'
     | '/admin/dashboard'
     | '/admin/ranking'
     | '/admin/reports'
@@ -258,12 +261,12 @@ export interface FileRouteTypes {
     | '/_authenticated/reports'
     | '/_authenticated/sales'
     | '/_authenticated/settings'
-    | '/_admin'
-    | '/_admin/dashboard'
-    | '/_admin/ranking'
-    | '/_admin/reports'
-    | '/_admin/users'
-    | '/_admin/users/$id'
+    | '/admin'
+    | '/admin/dashboard'
+    | '/admin/ranking'
+    | '/admin/reports'
+    | '/admin/users'
+    | '/admin/users/$id'
   fileRoutesById: FileRoutesById
 }
 
@@ -271,7 +274,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -360,47 +363,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_admin': {
-      id: '/_admin'
+    '/admin': {
+      id: '/admin'
       path: '/admin'
       fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteRouteImport
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_admin/dashboard': {
-      id: '/_admin/dashboard'
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
       path: '/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
-      parentRoute: typeof AdminRouteRoute
+      parentRoute: typeof AdminRoute
     }
-    '/_admin/ranking': {
-      id: '/_admin/ranking'
+    '/admin/ranking': {
+      id: '/admin/ranking'
       path: '/ranking'
       fullPath: '/admin/ranking'
       preLoaderRoute: typeof AdminRankingRouteImport
-      parentRoute: typeof AdminRouteRoute
+      parentRoute: typeof AdminRoute
     }
-    '/_admin/reports': {
-      id: '/_admin/reports'
+    '/admin/reports': {
+      id: '/admin/reports'
       path: '/reports'
       fullPath: '/admin/reports'
       preLoaderRoute: typeof AdminReportsRouteImport
-      parentRoute: typeof AdminRouteRoute
+      parentRoute: typeof AdminRoute
     }
-    '/_admin/users': {
-      id: '/_admin/users'
+    '/admin/users': {
+      id: '/admin/users'
       path: '/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminUsersRouteImport
-      parentRoute: typeof AdminRouteRoute
+      parentRoute: typeof AdminRoute
     }
-    '/_admin/users/$id': {
-      id: '/_admin/users/$id'
+    '/admin/users/$id': {
+      id: '/admin/users/$id'
       path: '/users/$id'
       fullPath: '/admin/users/$id'
       preLoaderRoute: typeof AdminUsersIdRouteImport
-      parentRoute: typeof AdminRouteRoute
+      parentRoute: typeof AdminRoute
     }
   }
 }
@@ -434,7 +437,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface AdminRouteRouteChildren {
+interface AdminRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminRankingRoute: typeof AdminRankingRoute
   AdminReportsRoute: typeof AdminReportsRoute
@@ -442,7 +445,7 @@ interface AdminRouteRouteChildren {
   AdminUsersIdRoute: typeof AdminUsersIdRoute
 }
 
-const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+const AdminRouteChildren: AdminRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminRankingRoute: AdminRankingRoute,
   AdminReportsRoute: AdminReportsRoute,
@@ -450,8 +453,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminUsersIdRoute: AdminUsersIdRoute,
 }
 
-const AdminRouteRouteWithChildren =
-  AdminRouteRoute._addFileChildren(AdminRouteRouteChildren)
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 // ─── Árvore raiz ──────────────────────────────────────────────────────────────
 
@@ -459,7 +461,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  AdminRouteRoute: AdminRouteRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
 }
 
 export const routeTree = rootRouteImport

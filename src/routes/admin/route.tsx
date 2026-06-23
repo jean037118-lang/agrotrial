@@ -1,10 +1,9 @@
 /**
- * routes/_admin/route.tsx
+ * routes/admin/route.tsx
  * Layout raiz do painel administrativo.
  *
- * IMPORTANTE: Este arquivo deve ser _admin/route.tsx (dentro de pasta),
- * NÃO _admin.tsx (arquivo solto). O plugin Vite do TanStack Router trata
- * arquivos soltos _nome.tsx como conflitantes com index.tsx no build.
+ * USA createFileRoute("/admin") — rota com caminho real, sem underscore.
+ * Isso evita o conflito do TanStack Start com layouts pathless (_admin).
  */
 
 import {
@@ -19,7 +18,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { ChevronRight, ShieldCheck } from "lucide-react";
 
-export const Route = createFileRoute("/_admin")({
+export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw redirect({ to: "/auth" });
