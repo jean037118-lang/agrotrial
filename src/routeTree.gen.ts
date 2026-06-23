@@ -111,6 +111,7 @@ const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
 
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/_admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 
