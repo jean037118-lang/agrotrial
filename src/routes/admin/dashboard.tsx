@@ -1,46 +1,46 @@
 /**
- * admin/dashboard.tsx
- * Dashboard do administrador.
+ * _admin/dashboard.tsx
+ * Dashboard do administrador — visão geral de toda a operação.
  *
  * Exibe:
- *   - KPIs globais: toneladas e comissão do mês/ano, total de vendas e clientes
- *   - Gráfico de barras: toneladas vendidas nos últimos 12 meses (todos os vendedores)
- *   - Cards de ranking com progresso de cada vendedor em relação à meta
+ *   - KPIs globais: total toneladas no mês/ano, comissão, clientes, vendedores ativos
+ *   - Gráfico de barras: vendas mensais dos últimos 12 meses
+ *   - Tabela de ranking de vendedores por toneladas no mês
  */
 
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useQuery, queryOptions } from "@tanstack/react-query";
 import { Suspense } from "react";
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
-import {
-  Wallet, Wheat, Users, Receipt,
-  TrendingUp, ShieldCheck, UserCheck,
-} from "lucide-react";
 import {
   fetchVendorSummaries, fetchAllSales,
   calcGlobalTotals, calcMonthlySales,
   type VendorSummary,
 } from "@/lib/admin";
 import { brl, tons } from "@/lib/agro";
+import {
+  Wheat, Wallet, Users, TrendingUp,
+  Trophy, UserCheck, ArrowRight,
+} from "lucide-react";
 
-// ─── Query options ────────────────────────────────────────────────────────────
+// ─── Query options ─────────────────────────────────────────────────────────────
 
 const summariesOpts = queryOptions({
-  queryKey: ["admin-vendor-summaries"],
+  queryKey: ["admin", "vendor-summaries"],
   queryFn: fetchVendorSummaries,
 });
 
 const allSalesOpts = queryOptions({
-  queryKey: ["admin-all-sales"],
+  queryKey: ["admin", "all-sales"],
   queryFn: fetchAllSales,
 });
 
 // ─── Rota ─────────────────────────────────────────────────────────────────────
 
-export const Route = createFileRoute("/admin/dashboard")({
+export const Route = createFileRoute("/_admin/dashboard")({
   loader: ({ context }) => {
     const qc = (context as { queryClient: import("@tanstack/react-query").QueryClient }).queryClient;
     return Promise.all([
@@ -55,264 +55,295 @@ export const Route = createFileRoute("/admin/dashboard")({
   ),
 });
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
+// ─── Componente principal ──────────────────────────────────────────────────────
 
 function AdminDashboard() {
-  const { data: summaries } = useSuspenseQuery(summariesOpts);
-  const { data: allSales }  = useSuspenseQuery(allSalesOpts);
+  const { data: summaries = [] } = useQuery(summariesOpts);
+  const { data: allSales = []  } = useQuery(allSalesOpts);
 
-  const totals   = calcGlobalTotals(summaries);
-  const monthly  = calcMonthlySales(allSales);
-  const maxTons  = Math.max(...monthly.map((m) => m.tons), 1);
+  const totals    = calcGlobalTotals(summaries);
+  const monthly   = calcMonthlySales(allSales);
 
-  // Formata mês abreviado para o eixo X
-  const chartData = monthly.map((m) => ({
-    ...m,
-    label: new Date(m.month + "-02").toLocaleDateString("pt-BR", {
-      month: "short",
-      year: "2-digit",
-    }),
-  }));
+  // Top 5 para o mini-ranking do dashboard
+  const top5 = summaries.slice(0, 5);
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-primary" />
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              Painel administrativo
-            </h1>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Visão consolidada de todos os vendedores.
-          </p>
-        </div>
-        <Link
-          to="/admin/users"
-          className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm hover:bg-muted"
-        >
-          <Users className="h-4 w-4" />
-          Gerenciar usuários
-        </Link>
+
+      {/* Cabeçalho */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          Visão geral
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Consolidado de todos os vendedores em tempo real.
+        </p>
       </div>
 
-      {/* KPIs globais */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      {/* KPI Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <KpiCard
           icon={Wheat}
-          bg="bg-emerald-100 text-emerald-700"
+          iconBg="bg-emerald-100 text-emerald-700"
           label="Toneladas no mês"
           value={tons(totals.monthTons)}
-          span={2}
-        />
-        <KpiCard
-          icon={Wallet}
-          bg="bg-amber-100 text-amber-700"
-          label="Comissão no mês"
-          value={brl(totals.monthCommission)}
-          span={2}
         />
         <KpiCard
           icon={TrendingUp}
-          bg="bg-blue-100 text-blue-700"
+          iconBg="bg-blue-100 text-blue-700"
           label="Toneladas no ano"
           value={tons(totals.yearTons)}
-          span={2}
         />
         <KpiCard
-          icon={Receipt}
-          bg="bg-violet-100 text-violet-700"
-          label="Total de vendas"
+          icon={Wallet}
+          iconBg="bg-amber-100 text-amber-700"
+          label="Comissão no mês"
+          value={brl(totals.monthCommission)}
+        />
+        <KpiCard
+          icon={Trophy}
+          iconBg="bg-orange-100 text-orange-600"
+          label="Vendas registradas"
           value={String(totals.totalSales)}
-          span={2}
         />
         <KpiCard
           icon={Users}
-          bg="bg-teal-100 text-teal-700"
+          iconBg="bg-violet-100 text-violet-700"
           label="Total de clientes"
           value={String(totals.totalClients)}
-          span={2}
         />
         <KpiCard
           icon={UserCheck}
-          bg="bg-orange-100 text-orange-700"
+          iconBg="bg-teal-100 text-teal-700"
           label="Vendedores ativos"
           value={String(totals.activeVendors)}
-          span={2}
         />
       </div>
 
-      {/* Gráfico de barras — toneladas por mês */}
-      <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
-        <div className="mb-6">
-          <h3 className="text-sm font-bold text-foreground">
+      {/* Gráfico + Ranking lado a lado */}
+      <div className="grid gap-6 lg:grid-cols-3">
+
+        {/* Gráfico de barras — últimos 12 meses */}
+        <section className="rounded-xl border border-border bg-card p-6 shadow-sm lg:col-span-2">
+          <h3 className="mb-6 text-sm font-bold text-foreground">
             Toneladas vendidas — últimos 12 meses
           </h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Consolidado de todos os vendedores
-          </p>
-        </div>
-        <ResponsiveContainer width="100%" height={240}>
-          <BarChart data={chartData} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="opacity-10" />
-            <XAxis
-              dataKey="label"
-              tick={{ fontSize: 11, fill: "currentColor", opacity: 0.5 }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 11, fill: "currentColor", opacity: 0.5 }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={(v) => `${v}t`}
-            />
-            <Tooltip
-              contentStyle={{
-                fontSize: 12,
-                borderRadius: 8,
-                border: "1px solid var(--border)",
-                background: "var(--card)",
-              }}
-              formatter={(v: number) => [`${v.toLocaleString("pt-BR")} t`, "Toneladas"]}
-              labelStyle={{ fontWeight: 600 }}
-            />
-            <Bar dataKey="tons" radius={[4, 4, 0, 0]} maxBarSize={48}>
-              {chartData.map((entry, i) => (
-                <Cell
-                  key={i}
-                  fill={entry.tons === maxTons ? "hsl(var(--primary))" : "hsl(var(--primary) / 0.3)"}
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </section>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={monthly} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                tickFormatter={(v) => {
+                  const [y, m] = v.split("-");
+                  return `${m}/${String(y).slice(2)}`;
+                }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v) => `${v}t`}
+              />
+              <Tooltip
+                formatter={(value: number, name: string) =>
+                  name === "tons"
+                    ? [tons(value), "Toneladas"]
+                    : [brl(value), "Comissão"]
+                }
+                labelFormatter={(label) => {
+                  const [y, m] = label.split("-");
+                  return `${m}/${y}`;
+                }}
+                contentStyle={{
+                  borderRadius: 8,
+                  border: "1px solid var(--border)",
+                  background: "var(--card)",
+                  fontSize: 12,
+                }}
+              />
+              <Legend
+                wrapperStyle={{ fontSize: 12, paddingTop: 12 }}
+                formatter={(v) => (v === "tons" ? "Toneladas" : "Comissão")}
+              />
+              <Bar dataKey="tons"       fill="#16a34a" radius={[4, 4, 0, 0]} maxBarSize={32} />
+              <Bar dataKey="commission" fill="#d97706" radius={[4, 4, 0, 0]} maxBarSize={32} />
+            </BarChart>
+          </ResponsiveContainer>
+        </section>
 
-      {/* Ranking de vendedores */}
+        {/* Mini-ranking */}
+        <section className="flex flex-col rounded-xl border border-border bg-card shadow-sm">
+          <div className="border-b border-border px-6 py-4">
+            <h4 className="text-sm font-bold text-foreground">Top vendedores — mês</h4>
+          </div>
+          {top5.length === 0 ? (
+            <div className="flex flex-1 items-center justify-center py-12 text-sm text-muted-foreground">
+              Nenhuma venda registrada.
+            </div>
+          ) : (
+            <ol className="flex-1 divide-y divide-border">
+              {top5.map((v, i) => (
+                <li key={v.vendor_id} className="flex items-center gap-3 px-6 py-3">
+                  <RankBadge position={i + 1} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {v.vendor_name ?? "—"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {tons(Number(v.month_tons))} · {brl(Number(v.month_commission))}
+                    </p>
+                  </div>
+                  {!v.active && (
+                    <span className="shrink-0 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
+                      Inativo
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          )}
+          <div className="border-t border-border p-4">
+            <Link
+              to="/admin/ranking"
+              className="flex w-full items-center justify-center gap-1 rounded-lg border border-border bg-card py-2 text-xs font-bold text-primary transition-colors hover:bg-accent"
+            >
+              Ver ranking completo
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+        </section>
+      </div>
+
+      {/* Tabela completa de vendedores */}
       <section className="rounded-xl border border-border bg-card shadow-sm">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h4 className="text-sm font-bold text-foreground">Ranking de vendedores — mês atual</h4>
+          <h4 className="text-sm font-bold text-foreground">Todos os vendedores</h4>
           <Link
-            to="/admin/ranking"
-            className="text-xs font-semibold text-primary hover:underline"
+            to="/admin/users"
+            className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
           >
-            Ver ranking completo →
+            Gerenciar <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
-
-        {summaries.length === 0 ? (
-          <div className="flex flex-col items-center justify-center px-6 py-12 text-muted-foreground">
-            <Users className="mb-3 h-10 w-10 opacity-20" />
-            <p className="text-sm font-medium">Nenhum vendedor cadastrado ainda.</p>
-          </div>
-        ) : (
-          <ul className="divide-y divide-border">
-            {summaries.slice(0, 5).map((s, i) => (
-              <VendorRankRow key={s.vendor_id} summary={s} position={i + 1} />
-            ))}
-          </ul>
-        )}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/40">
+                <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">Vendedor</th>
+                <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">Tons mês</th>
+                <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">Comissão mês</th>
+                <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">Tons ano</th>
+                <th className="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">Clientes</th>
+                <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {summaries.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-10 text-center text-muted-foreground">
+                    Nenhum vendedor cadastrado.
+                  </td>
+                </tr>
+              ) : (
+                summaries.map((v) => (
+                  <tr key={v.vendor_id} className="transition-colors hover:bg-muted/30">
+                    <td className="px-6 py-4">
+                      <div>
+                        <p className="font-semibold text-foreground">{v.vendor_name ?? "—"}</p>
+                        <p className="text-xs text-muted-foreground">{v.vendor_email ?? ""}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-right font-mono text-foreground">
+                      {tons(Number(v.month_tons))}
+                    </td>
+                    <td className="px-4 py-4 text-right font-mono text-amber-700 dark:text-amber-400">
+                      {brl(Number(v.month_commission))}
+                    </td>
+                    <td className="px-4 py-4 text-right font-mono text-foreground">
+                      {tons(Number(v.year_tons))}
+                    </td>
+                    <td className="px-4 py-4 text-right text-foreground">
+                      {v.total_clients}
+                    </td>
+                    <td className="px-4 py-4 text-center">
+                      <StatusBadge active={v.active} />
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   );
 }
 
-// ─── Sub-componentes ──────────────────────────────────────────────────────────
+// ─── Sub-componentes ───────────────────────────────────────────────────────────
 
 function KpiCard({
-  icon: Icon, bg, label, value, span = 1,
+  icon: Icon, iconBg, label, value,
 }: {
   icon: React.ComponentType<{ className?: string }>;
-  bg: string;
+  iconBg: string;
   label: string;
   value: string;
-  span?: number;
 }) {
   return (
-    <div
-      className="rounded-xl border border-border bg-card p-5 shadow-sm"
-      style={{ gridColumn: `span ${span}` }}
-    >
-      <div className={`mb-3 grid h-9 w-9 place-items-center rounded-lg ${bg}`}>
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <div className={`mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg ${iconBg}`}>
         <Icon className="h-5 w-5" />
       </div>
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">{value}</p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
+      <p className="mt-1 text-xl font-bold tabular-nums text-foreground">{value}</p>
     </div>
   );
 }
 
-function VendorRankRow({
-  summary, position,
-}: {
-  summary: VendorSummary;
-  position: number;
-}) {
-  const pct = summary.monthly_goal_tons > 0
-    ? Math.min(100, (Number(summary.month_tons) / Number(summary.monthly_goal_tons)) * 100)
-    : 0;
-
-  const medalColor =
-    position === 1 ? "text-amber-500" :
-    position === 2 ? "text-slate-400" :
-    position === 3 ? "text-amber-700" : "text-muted-foreground/40";
-
+function RankBadge({ position }: { position: number }) {
+  const styles: Record<number, string> = {
+    1: "bg-amber-100 text-amber-700",
+    2: "bg-slate-100 text-slate-600",
+    3: "bg-orange-100 text-orange-700",
+  };
   return (
-    <li className="flex items-center gap-4 px-6 py-4">
-      {/* Posição */}
-      <span className={`w-6 shrink-0 text-center text-sm font-black ${medalColor}`}>
-        {position <= 3 ? ["🥇", "🥈", "🥉"][position - 1] : `#${position}`}
-      </span>
+    <span
+      className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold ${
+        styles[position] ?? "bg-muted text-muted-foreground"
+      }`}
+    >
+      {position}
+    </span>
+  );
+}
 
-      {/* Nome + barra de progresso */}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-sm font-semibold text-foreground">
-            {summary.vendor_name ?? "—"}
-          </span>
-          <span className="shrink-0 text-xs text-muted-foreground">
-            {pct.toFixed(0)}% da meta
-          </span>
-        </div>
-        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-primary transition-all duration-500"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Toneladas e comissão */}
-      <div className="hidden shrink-0 text-right sm:block">
-        <div className="text-sm font-bold tabular-nums text-foreground">
-          {tons(Number(summary.month_tons))}
-        </div>
-        <div className="text-xs text-muted-foreground">
-          {brl(Number(summary.month_commission))}
-        </div>
-      </div>
-
-      {/* Status */}
-      {!summary.active && (
-        <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600">
-          Inativo
-        </span>
-      )}
-    </li>
+function StatusBadge({ active }: { active: boolean }) {
+  return (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+        active
+          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+          : "bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400"
+      }`}
+    >
+      {active ? "Ativo" : "Inativo"}
+    </span>
   );
 }
 
 function LoadingState() {
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
-      {[...Array(3)].map((_, i) => (
-        <div key={i} className="h-32 animate-pulse rounded-xl bg-muted" />
-      ))}
+    <div className="mx-auto max-w-7xl space-y-8">
+      <div className="h-8 w-48 animate-pulse rounded-lg bg-muted" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="h-28 animate-pulse rounded-xl bg-muted" />
+        ))}
+      </div>
+      <div className="h-80 animate-pulse rounded-xl bg-muted" />
     </div>
   );
 }
