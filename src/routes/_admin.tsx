@@ -1,10 +1,6 @@
 /**
- * _admin.tsx
- * Layout raiz do painel administrativo do AgroTrial.
- *
- * - beforeLoad verifica sessão, role e status ativo
- * - Vendedor que tenta acessar /admin/* é redirecionado para /dashboard
- * - Usa AdminSidebar em vez da AppSidebar do vendedor
+ * routes/_admin.tsx — CORRIGIDO
+ * Usa getSession() no beforeLoad (sem chamada de rede, sem 403).
  */
 
 import {
@@ -21,8 +17,9 @@ import { ChevronRight, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/_admin")({
   beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
+    // getSession() lê do localStorage — sem chamada de rede, sem 403
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/auth" });
 
     const profile = await fetchAuthProfile();
     if (!profile) throw redirect({ to: "/auth" });
@@ -38,12 +35,10 @@ export const Route = createFileRoute("/_admin")({
       throw redirect({ to: "/dashboard" });
     }
 
-    return { user: data.user, profile };
+    return { user: data.session.user, profile };
   },
   component: AdminLayout,
 });
-
-// ─── Mapa de títulos por rota admin ──────────────────────────────────────────
 
 const ADMIN_TITLES: Record<string, string> = {
   "/admin/dashboard": "Dashboard",
@@ -52,16 +47,11 @@ const ADMIN_TITLES: Record<string, string> = {
   "/admin/users":     "Gerenciar Usuários",
 };
 
-// ─── Layout ───────────────────────────────────────────────────────────────────
-
 function AdminLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-
-  // Título dinâmico: rotas de edição de usuário mostram "Editar Usuário"
-  const title =
-    pathname.startsWith("/admin/users/")
-      ? "Editar Usuário"
-      : ADMIN_TITLES[pathname] ?? "Administração";
+  const title = pathname.startsWith("/admin/users/")
+    ? "Editar Usuário"
+    : ADMIN_TITLES[pathname] ?? "Administração";
 
   return (
     <SidebarProvider>

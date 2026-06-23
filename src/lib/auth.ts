@@ -1,12 +1,13 @@
 /**
- * auth.ts
- * Funções centrais de autenticação do AgroTrial com suporte a RBAC.
- * Usado pelo hook useProfile e pelo redirecionamento pós-login.
+ * auth.ts — CORRIGIDO
+ *
+ * Problema original: getUser() faz chamada ao servidor e retorna 403 no browser.
+ * Solução: usar getSession() que lê o token local (localStorage) sem chamada de rede.
+ * Também trocado .single() por .maybeSingle() para evitar o erro 406 quando
+ * o profile ainda não existe.
  */
 
 import { supabase } from "@/integrations/supabase/client";
-
-// ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export type UserRole = "admin" | "vendedor";
 
@@ -21,27 +22,27 @@ export interface AuthProfile {
   recall_days: number;
 }
 
-// ─── Funções ──────────────────────────────────────────────────────────────────
-
 /**
- * Busca o perfil completo do usuário logado, incluindo role.
- * Retorna null se não houver sessão ativa.
+ * Busca o perfil completo do usuário logado incluindo role.
+ * Usa getSession() (local, sem rede) para obter o user_id,
+ * depois faz uma única query na tabela profiles.
  */
 export async function fetchAuthProfile(): Promise<AuthProfile | null> {
+  // getSession() lê do localStorage — sem chamada de rede, sem 403
   const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (authError || !user) return null;
+  if (!session?.user) return null;
 
+  // maybeSingle() retorna null se não encontrar (evita o 406 do .single())
   const { data, error } = await supabase
     .from("profiles")
     .select(
       "id, full_name, email, role, active, commission_per_ton, monthly_goal_tons, recall_days"
     )
-    .eq("id", user.id)
-    .single();
+    .eq("id", session.user.id)
+    .maybeSingle();
 
   if (error || !data) return null;
 
@@ -50,7 +51,6 @@ export async function fetchAuthProfile(): Promise<AuthProfile | null> {
 
 /**
  * Retorna apenas o role do usuário logado.
- * Versão leve para checks rápidos de autorização.
  */
 export async function fetchUserRole(): Promise<UserRole | null> {
   const profile = await fetchAuthProfile();
@@ -58,9 +58,7 @@ export async function fetchUserRole(): Promise<UserRole | null> {
 }
 
 /**
- * Retorna a rota de destino após login com base no role.
- *   admin    → /admin/dashboard
- *   vendedor → /dashboard
+ * Retorna a rota de destino pós-login com base no role.
  */
 export function getHomeRouteForRole(role: UserRole): "/admin/dashboard" | "/dashboard" {
   return role === "admin" ? "/admin/dashboard" : "/dashboard";
@@ -68,7 +66,6 @@ export function getHomeRouteForRole(role: UserRole): "/admin/dashboard" | "/dash
 
 /**
  * Verifica se o usuário logado está ativo.
- * Vendedores inativos são bloqueados mesmo com sessão válida.
  */
 export async function checkUserIsActive(): Promise<boolean> {
   const profile = await fetchAuthProfile();
