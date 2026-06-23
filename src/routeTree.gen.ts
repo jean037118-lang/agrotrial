@@ -8,7 +8,6 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// ─── Rotas existentes (vendedor) ──────────────────────────────────────────────
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -22,8 +21,6 @@ import { Route as AuthenticatedFutureSalesRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
-
-// ─── Rotas novas (admin) ──────────────────────────────────────────────────────
 import { Route as AdminRouteRouteImport } from './routes/_admin'
 import { Route as AdminDashboardRouteImport } from './routes/_admin/dashboard'
 import { Route as AdminRankingRouteImport } from './routes/_admin/ranking'
@@ -31,7 +28,7 @@ import { Route as AdminReportsRouteImport } from './routes/_admin/reports'
 import { Route as AdminUsersRouteImport } from './routes/_admin/users'
 import { Route as AdminUsersIdRouteImport } from './routes/_admin/users.$id'
 
-// ─── Instâncias das rotas existentes ─────────────────────────────────────────
+// ─── Instâncias ───────────────────────────────────────────────────────────────
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -39,9 +36,10 @@ const AuthRoute = AuthRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
+// CORREÇÃO CRÍTICA: path deve ser '' (vazio) — _authenticated é um layout pathless
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
-  path: '/admin',
+  path: '',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -107,7 +105,7 @@ const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
-// ─── Instâncias das rotas admin ───────────────────────────────────────────────
+// ─── Admin ────────────────────────────────────────────────────────────────────
 
 const AdminRouteRoute = AdminRouteRouteImport.update({
   id: '/_admin',
@@ -145,12 +143,11 @@ const AdminUsersIdRoute = AdminUsersIdRouteImport.update({
   getParentRoute: () => AdminRouteRoute,
 } as any)
 
-// ─── Interfaces de tipos de rotas ─────────────────────────────────────────────
+// ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  // Rotas do vendedor
   '/agenda': typeof AuthenticatedAgendaRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -160,7 +157,6 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedReportsRoute
   '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  // Rotas do admin
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/ranking': typeof AdminRankingRoute
   '/admin/reports': typeof AdminReportsRoute
@@ -201,7 +197,6 @@ export interface FileRoutesById {
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/sales': typeof AuthenticatedSalesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  // Admin
   '/_admin': typeof AdminRouteRouteWithChildren
   '/_admin/dashboard': typeof AdminDashboardRoute
   '/_admin/ranking': typeof AdminRankingRoute
@@ -277,8 +272,6 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
 }
 
-// ─── Declarações de módulo ────────────────────────────────────────────────────
-
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/auth': {
@@ -291,7 +284,7 @@ declare module '@tanstack/react-router' {
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
-      fullPath: '/'
+      fullPath: ''
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -365,7 +358,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    // ── Admin ──────────────────────────────────────────────────────────────
     '/_admin': {
       id: '/_admin'
       path: '/admin'
@@ -411,7 +403,7 @@ declare module '@tanstack/react-router' {
   }
 }
 
-// ─── Filhos das rotas do vendedor ─────────────────────────────────────────────
+// ─── Filhos ───────────────────────────────────────────────────────────────────
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
@@ -439,8 +431,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
-
-// ─── Filhos das rotas do admin ────────────────────────────────────────────────
 
 interface AdminRouteRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
