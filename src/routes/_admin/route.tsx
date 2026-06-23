@@ -1,6 +1,10 @@
 /**
- * routes/_admin.tsx — CORRIGIDO
- * Usa getSession() no beforeLoad (sem chamada de rede, sem 403).
+ * routes/_admin/route.tsx
+ * Layout raiz do painel administrativo.
+ *
+ * IMPORTANTE: Este arquivo deve ser _admin/route.tsx (dentro de pasta),
+ * NÃO _admin.tsx (arquivo solto). O plugin Vite do TanStack Router trata
+ * arquivos soltos _nome.tsx como conflitantes com index.tsx no build.
  */
 
 import {
@@ -17,20 +21,17 @@ import { ChevronRight, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/_admin")({
   beforeLoad: async () => {
-    // getSession() lê do localStorage — sem chamada de rede, sem 403
     const { data } = await supabase.auth.getSession();
     if (!data.session) throw redirect({ to: "/auth" });
 
     const profile = await fetchAuthProfile();
     if (!profile) throw redirect({ to: "/auth" });
 
-    // Usuário inativo → desloga
     if (!profile.active) {
       await supabase.auth.signOut();
       throw redirect({ to: "/auth" });
     }
 
-    // Vendedor tentando acessar área admin → redireciona para seu painel
     if (profile.role !== "admin") {
       throw redirect({ to: "/dashboard" });
     }

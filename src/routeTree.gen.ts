@@ -21,7 +21,9 @@ import { Route as AuthenticatedFutureSalesRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
-import { Route as AdminRouteRouteImport } from './routes/_admin'
+
+// CORRIGIDO: importa de _admin/route (pasta) e não de _admin.tsx (arquivo solto)
+import { Route as AdminRouteRouteImport } from './routes/_admin/route'
 import { Route as AdminDashboardRouteImport } from './routes/_admin/dashboard'
 import { Route as AdminRankingRouteImport } from './routes/_admin/ranking'
 import { Route as AdminReportsRouteImport } from './routes/_admin/reports'
@@ -36,7 +38,7 @@ const AuthRoute = AuthRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 
-// CORREÇÃO CRÍTICA: path deve ser '' (vazio) — _authenticated é um layout pathless
+// path: '' — layout pathless, igual ao _authenticated
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   path: '',
