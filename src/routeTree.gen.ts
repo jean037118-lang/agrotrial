@@ -8,6 +8,7 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+// ─── Rotas existentes (vendedor) ──────────────────────────────────────────────
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -22,71 +23,132 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedClientsRouteImport } from './routes/_authenticated/clients'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 
+// ─── Rotas novas (admin) ──────────────────────────────────────────────────────
+import { Route as AdminRouteRouteImport } from './routes/_admin'
+import { Route as AdminDashboardRouteImport } from './routes/_admin/dashboard'
+import { Route as AdminRankingRouteImport } from './routes/_admin/ranking'
+import { Route as AdminReportsRouteImport } from './routes/_admin/reports'
+import { Route as AdminUsersRouteImport } from './routes/_admin/users'
+import { Route as AdminUsersIdRouteImport } from './routes/_admin/users.$id'
+
+// ─── Instâncias das rotas existentes ─────────────────────────────────────────
+
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
+
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+
 const AuthenticatedSalesRoute = AuthenticatedSalesRouteImport.update({
   id: '/sales',
   path: '/sales',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+
 const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+
 const AuthenticatedRankingRoute = AuthenticatedRankingRouteImport.update({
   id: '/ranking',
   path: '/ranking',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+
 const AuthenticatedGypsumCalculatorRoute =
   AuthenticatedGypsumCalculatorRouteImport.update({
     id: '/gypsum-calculator',
     path: '/gypsum-calculator',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+
 const AuthenticatedFutureSalesRoute =
   AuthenticatedFutureSalesRouteImport.update({
     id: '/future-sales',
     path: '/future-sales',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+
 const AuthenticatedClientsRoute = AuthenticatedClientsRouteImport.update({
   id: '/clients',
   path: '/clients',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+
 const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
   id: '/agenda',
   path: '/agenda',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
+// ─── Instâncias das rotas admin ───────────────────────────────────────────────
+
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/_admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+
+const AdminRankingRoute = AdminRankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+
+const AdminUsersIdRoute = AdminUsersIdRouteImport.update({
+  id: '/users/$id',
+  path: '/users/$id',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+
+// ─── Interfaces de tipos de rotas ─────────────────────────────────────────────
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  // Rotas do vendedor
   '/agenda': typeof AuthenticatedAgendaRoute
   '/clients': typeof AuthenticatedClientsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -96,7 +158,14 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedReportsRoute
   '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  // Rotas do admin
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/ranking': typeof AdminRankingRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/users/$id': typeof AdminUsersIdRoute
 }
+
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
@@ -109,7 +178,13 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsRoute
   '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/ranking': typeof AdminRankingRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/users/$id': typeof AdminUsersIdRoute
 }
+
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
@@ -124,7 +199,15 @@ export interface FileRoutesById {
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/sales': typeof AuthenticatedSalesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  // Admin
+  '/_admin': typeof AdminRouteRouteWithChildren
+  '/_admin/dashboard': typeof AdminDashboardRoute
+  '/_admin/ranking': typeof AdminRankingRoute
+  '/_admin/reports': typeof AdminReportsRoute
+  '/_admin/users': typeof AdminUsersRoute
+  '/_admin/users/$id': typeof AdminUsersIdRoute
 }
+
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
@@ -139,6 +222,11 @@ export interface FileRouteTypes {
     | '/reports'
     | '/sales'
     | '/settings'
+    | '/admin/dashboard'
+    | '/admin/ranking'
+    | '/admin/reports'
+    | '/admin/users'
+    | '/admin/users/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -152,6 +240,11 @@ export interface FileRouteTypes {
     | '/reports'
     | '/sales'
     | '/settings'
+    | '/admin/dashboard'
+    | '/admin/ranking'
+    | '/admin/reports'
+    | '/admin/users'
+    | '/admin/users/$id'
   id:
     | '__root__'
     | '/'
@@ -166,13 +259,23 @@ export interface FileRouteTypes {
     | '/_authenticated/reports'
     | '/_authenticated/sales'
     | '/_authenticated/settings'
+    | '/_admin'
+    | '/_admin/dashboard'
+    | '/_admin/ranking'
+    | '/_admin/reports'
+    | '/_admin/users'
+    | '/_admin/users/$id'
   fileRoutesById: FileRoutesById
 }
+
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
 }
+
+// ─── Declarações de módulo ────────────────────────────────────────────────────
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
@@ -260,8 +363,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgendaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    // ── Admin ──────────────────────────────────────────────────────────────
+    '/_admin': {
+      id: '/_admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_admin/dashboard': {
+      id: '/_admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/_admin/ranking': {
+      id: '/_admin/ranking'
+      path: '/ranking'
+      fullPath: '/admin/ranking'
+      preLoaderRoute: typeof AdminRankingRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/_admin/reports': {
+      id: '/_admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/_admin/users': {
+      id: '/_admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/_admin/users/$id': {
+      id: '/_admin/users/$id'
+      path: '/users/$id'
+      fullPath: '/admin/users/$id'
+      preLoaderRoute: typeof AdminUsersIdRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
   }
 }
+
+// ─── Filhos das rotas do vendedor ─────────────────────────────────────────────
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
@@ -290,11 +438,36 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+// ─── Filhos das rotas do admin ────────────────────────────────────────────────
+
+interface AdminRouteRouteChildren {
+  AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminRankingRoute: typeof AdminRankingRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminUsersIdRoute: typeof AdminUsersIdRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminDashboardRoute: AdminDashboardRoute,
+  AdminRankingRoute: AdminRankingRoute,
+  AdminReportsRoute: AdminReportsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminUsersIdRoute: AdminUsersIdRoute,
+}
+
+const AdminRouteRouteWithChildren =
+  AdminRouteRoute._addFileChildren(AdminRouteRouteChildren)
+
+// ─── Árvore raiz ──────────────────────────────────────────────────────────────
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
 }
+
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
