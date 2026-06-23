@@ -1,13 +1,6 @@
 /**
- * auth.tsx
- * Página de login do AgroTrial.
- *
- * Alterações RBAC (Etapa 3):
- *   - Após login bem-sucedido, busca o profile.role do usuário
- *   - admin    → redireciona para /admin/dashboard
- *   - vendedor → redireciona para /dashboard
- *   - Vendedor inativo → exibe erro e não permite acesso
- *   - Sessão já ativa → redireciona para a rota correta por role
+ * routes/auth.tsx — CORRIGIDO
+ * Usa getSession() (sem chamada de rede) em vez de getUser().
  */
 
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -30,21 +23,12 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Se já há sessão ativa, redireciona para a rota correta por role
+  // Sessão já ativa → redireciona para a rota correta por role
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
       if (!data.session) return;
-
       const profile = await fetchAuthProfile();
-      if (!profile) return;
-
-      if (!profile.active) {
-        // Sessão existe mas usuário foi inativado — desloga
-        await supabase.auth.signOut();
-        toast.error("Sua conta foi desativada. Entre em contato com o administrador.");
-        return;
-      }
-
+      if (!profile || !profile.active) return;
       navigate({ to: getHomeRouteForRole(profile.role), replace: true });
     });
   }, [navigate]);
@@ -53,7 +37,6 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
 
-    // 1. Autentica no Supabase Auth
     const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -61,24 +44,24 @@ function AuthPage() {
 
     if (authError) {
       setLoading(false);
-      toast.error(authError.message === "Invalid login credentials"
-        ? "E-mail ou senha incorretos."
-        : authError.message
+      toast.error(
+        authError.message === "Invalid login credentials"
+          ? "E-mail ou senha incorretos."
+          : authError.message
       );
       return;
     }
 
-    // 2. Busca o perfil com role para decidir o destino
+    // Busca profile para obter role
     const profile = await fetchAuthProfile();
 
     if (!profile) {
       setLoading(false);
-      toast.error("Não foi possível carregar seu perfil. Tente novamente.");
       await supabase.auth.signOut();
+      toast.error("Perfil não encontrado. Entre em contato com o administrador.");
       return;
     }
 
-    // 3. Bloqueia usuários inativos antes de entrar no sistema
     if (!profile.active) {
       setLoading(false);
       await supabase.auth.signOut();
@@ -86,12 +69,8 @@ function AuthPage() {
       return;
     }
 
-    // 4. Redireciona conforme o papel
     setLoading(false);
-    toast.success(profile.role === "admin"
-      ? "Bem-vindo, administrador!"
-      : "Bem-vindo de volta!"
-    );
+    toast.success(profile.role === "admin" ? "Bem-vindo, administrador!" : "Bem-vindo de volta!");
     navigate({ to: getHomeRouteForRole(profile.role), replace: true });
   }
 
@@ -107,31 +86,23 @@ function AuthPage() {
             Entrar
           </h1>
           <p className="mt-1 text-center text-sm text-muted-foreground">
-            Acesse o AgroTrial CRM
+            Acesse sua carteira de clientes
           </p>
 
           <form onSubmit={handleSignIn} className="mt-6 space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email-in">E-mail</Label>
               <Input
-                id="email-in"
-                type="email"
-                required
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="email-in" type="email" required autoComplete="email"
+                value={email} onChange={(e) => setEmail(e.target.value)}
                 className="h-12 rounded-xl text-base"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="pw-in">Senha</Label>
               <Input
-                id="pw-in"
-                type="password"
-                required
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                id="pw-in" type="password" required autoComplete="current-password"
+                value={password} onChange={(e) => setPassword(e.target.value)}
                 className="h-12 rounded-xl text-base"
               />
             </div>

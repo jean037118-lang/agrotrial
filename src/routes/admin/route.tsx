@@ -22,8 +22,10 @@ import { ChevronRight, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
+    const { data } = await supabase.auth.getSession();
+
+if (!data.session) {
+  throw redirect({ to: "/auth" });
 
     const profile = await fetchAuthProfile();
     if (!profile) throw redirect({ to: "/auth" });
@@ -39,7 +41,10 @@ export const Route = createFileRoute("/admin")({
       throw redirect({ to: "/dashboard" });
     }
 
-    return { user: data.user, profile };
+    return {
+  user: data.session.user,
+  profile,
+};
   },
   component: AdminLayout,
 });

@@ -1,12 +1,6 @@
 /**
- * _authenticated/route.tsx
- * Layout raiz das rotas de vendedor (dashboard, clientes, vendas, agenda…).
- *
- * Alterações RBAC (Etapa 3):
- *   - beforeLoad agora verifica role além de sessão
- *   - Se o usuário logado for admin → redireciona para /admin/dashboard
- *   - Se o usuário estiver inativo   → redireciona para /auth
- *   - Vendedor ativo → acesso normal (comportamento anterior mantido)
+ * routes/_authenticated/route.tsx — CORRIGIDO
+ * Usa getSession() no beforeLoad (sem chamada de rede, sem 403).
  */
 
 import {
@@ -23,34 +17,28 @@ import { ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
-    // 1. Verifica se há sessão ativa
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
+    // getSession() lê do localStorage — sem chamada de rede, sem 403
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) throw redirect({ to: "/auth" });
 
-    // 2. Busca perfil com role
     const profile = await fetchAuthProfile();
-
-    // 3. Sem perfil (raro — trigger pode ter falhado)
     if (!profile) throw redirect({ to: "/auth" });
 
-    // 4. Usuário inativo → bloqueia acesso
+    // Usuário inativo → desloga
     if (!profile.active) {
       await supabase.auth.signOut();
       throw redirect({ to: "/auth" });
     }
 
-    // 5. Admin não acessa rotas de vendedor → redireciona para painel admin
+    // Admin não acessa rotas de vendedor
     if (profile.role === "admin") {
       throw redirect({ to: "/admin/dashboard" });
     }
 
-    // 6. Vendedor ativo → passa o user e profile para o contexto da rota
-    return { user: data.user, profile };
+    return { user: data.session.user, profile };
   },
   component: AuthedLayout,
 });
-
-// ─── Mapa de títulos por rota ─────────────────────────────────────────────────
 
 const TITLES: Record<string, string> = {
   "/dashboard":         "Dashboard",
@@ -63,8 +51,6 @@ const TITLES: Record<string, string> = {
   "/reports":           "Relatórios",
   "/settings":          "Configurações",
 };
-
-// ─── Layout do vendedor ───────────────────────────────────────────────────────
 
 function AuthedLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
