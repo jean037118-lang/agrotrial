@@ -1,6 +1,12 @@
 /**
  * AdminSidebar.tsx
  * Sidebar exclusiva do painel administrativo do AgroTrial.
+ *
+ * Alterações visuais:
+ *   - Logo com fundo branco (bg-white) ✓
+ *   - Itens de menu ativos/hover em azul escuro #0D1B2A (cor da logo)
+ *   - Badge "Administrador" e ícone ShieldCheck em azul escuro
+ *   - Ícone colapsado em azul escuro em vez do verde padrão
  */
 
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
@@ -18,6 +24,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import logo from "@/assets/agrotrial-logo.png";
 import { useProfile } from "@/hooks/useProfile";
+
+// Azul escuro da logo AgroTrial
+const BRAND = "#0D1B2A";
 
 const ADMIN_ITEMS = [
   { title: "Dashboard",  url: "/admin/dashboard", icon: LayoutDashboard },
@@ -47,17 +56,29 @@ export function AdminSidebar() {
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center px-2 py-3">
           {collapsed ? (
-            <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
+            /* Ícone colapsado — azul escuro da logo */
+            <div
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-white"
+              style={{ backgroundColor: BRAND }}
+            >
               <Sprout className="h-4 w-4" strokeWidth={2.5} />
             </div>
           ) : (
             <div className="space-y-1 px-1">
+              {/* Logo com fundo branco */}
               <div className="rounded-xl bg-white px-3 py-2 shadow-sm">
                 <img src={logo} alt="AgroTrial" className="h-6 w-auto" />
               </div>
+              {/* Badge Administrador — azul escuro */}
               <div className="flex items-center gap-1.5 px-1">
-                <ShieldCheck className="h-3 w-3 text-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                <ShieldCheck
+                  className="h-3 w-3"
+                  style={{ color: BRAND }}
+                />
+                <span
+                  className="text-[10px] font-bold uppercase tracking-widest"
+                  style={{ color: BRAND }}
+                >
                   Administrador
                 </span>
               </div>
@@ -77,10 +98,25 @@ export function AdminSidebar() {
                 const active = pathname === item.url || pathname.startsWith(item.url + "/");
                 return (
                   <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={active}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={active}
+                      /* Item ativo: fundo azul escuro suave + texto/ícone azul escuro */
+                      style={active ? {
+                        backgroundColor: `${BRAND}15`,
+                        color: BRAND,
+                        fontWeight: 600,
+                      } : undefined}
+                      className={!active
+                        ? "hover:bg-[#0D1B2A]/10 hover:text-[#0D1B2A]"
+                        : ""
+                      }
+                    >
                       <Link to={item.url} className="flex items-center gap-3">
                         <item.icon className="h-4 w-4" />
-                        {!collapsed && <span className="text-sm font-medium">{item.title}</span>}
+                        {!collapsed && (
+                          <span className="text-sm">{item.title}</span>
+                        )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
