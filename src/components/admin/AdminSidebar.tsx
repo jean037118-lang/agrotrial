@@ -1,7 +1,6 @@
 /**
- * AdminSidebar.tsx
- * Sidebar com fundo azul escuro #0D1B2A (mesma cor da logo).
- * Logo maior, sem fundo branco. Texto e ícones em branco.
+ * AdminSidebar.tsx — versão corrigida
+ * Fundo azul escuro #0D1B2A, logo sem filtro e maior, menu branco.
  */
 
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
@@ -50,23 +49,22 @@ export function AdminSidebar() {
     >
       {/* ── Header / Logo ─────────────────────────────────────────── */}
       <SidebarHeader style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <div className="flex items-center justify-center px-2 py-5">
+        <div className="flex items-center justify-center px-3 py-5">
           {collapsed ? (
             <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/10">
               <Sprout className="h-5 w-5 text-white" strokeWidth={2.5} />
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-2">
-              {/* Logo sem fundo, maior */}
+            <div className="flex flex-col items-center gap-2 w-full">
+              {/* Logo original sem filtro, sem fundo branco, maior */}
               <img
                 src={logo}
                 alt="AgroTrial"
-                className="h-10 w-auto"
-                style={{ filter: "brightness(0) invert(1)" }}
+                className="w-full max-w-[160px] h-auto object-contain"
               />
               <div className="flex items-center gap-1">
-                <ShieldCheck className="h-3 w-3 text-white/60" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">
+                <ShieldCheck className="h-3 w-3 text-white/50" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">
                   Administrador
                 </span>
               </div>
