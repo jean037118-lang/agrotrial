@@ -63,15 +63,18 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center px-2 py-3">
           {collapsed ? (
-            <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <Sprout className="h-4 w-4" strokeWidth={2.5} />
-            </div>
-          ) : (
-            <div className="rounded-xl bg-white px-3 py-2 shadow-sm">
-              <img src={logo} alt="AgroTrial" className="h-6 w-auto" />
-            </div>
-          )}
-        </div>
+  <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/10">
+    <Sprout className="h-4 w-4 text-white" strokeWidth={2.5} />
+  </div>
+) : (
+  <div className="flex justify-center w-full py-4">
+    <img
+      src={logo}
+      alt="AgroTrial"
+      className="w-full max-w-[170px] h-auto object-contain"
+    />
+  </div>
+)}
       </SidebarHeader>
 
       <SidebarContent>
