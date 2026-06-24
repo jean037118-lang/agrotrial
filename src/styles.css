@@ -55,9 +55,8 @@
 :root {
   --radius: 0.75rem;
 
-  /* Modern Enterprise: slate canvas + deep forest sidebar + emerald accents + earth CTA */
-  --background: oklch(0.985 0.005 250);         /* slate-50 */
-  --foreground: oklch(0.21 0.04 265);           /* slate-900 */
+  --background: oklch(0.985 0.005 250);
+  --foreground: oklch(0.21 0.04 265);
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.21 0.04 265);
@@ -65,22 +64,23 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.21 0.04 265);
 
-  ----primary: #0D1B2A;              /* emerald-600 */
+  /* ── PRIMARY: azul escuro #0D1B2A ─────────────────────────── */
+  --primary: oklch(0.17 0.04 240);
   --primary-foreground: oklch(0.99 0 0);
 
-  --secondary: oklch(0.96 0.008 250);           /* slate-100 */
+  --secondary: oklch(0.96 0.008 250);
   --secondary-foreground: oklch(0.28 0.04 265);
 
   --muted: oklch(0.96 0.008 250);
-  --muted-foreground: oklch(0.55 0.025 260);    /* slate-500 */
+  --muted-foreground: oklch(0.55 0.025 260);
 
-  --accent: oklch(0.96 0.008 250);
-  --accent-foreground: oklch(0.28 0.04 265);
+  --accent: oklch(0.94 0.012 240);
+  --accent-foreground: oklch(0.17 0.04 240);
 
   --destructive: oklch(0.6 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --earth: oklch(0.45 0.1 50);                  /* #8B4513 saddle brown */
+  --earth: oklch(0.45 0.1 50);
   --earth-foreground: oklch(0.99 0 0);
 
   --gold: oklch(0.78 0.13 80);
@@ -89,37 +89,35 @@
   --success: oklch(0.6 0.14 155);
   --success-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.92 0.008 250);              /* slate-200 */
+  --border: oklch(0.92 0.008 250);
   --input: oklch(0.92 0.008 250);
-  --ring: oklch(0.55 0.15 155);
+  --ring: oklch(0.17 0.04 240);
 
- --sidebar: #0D1B2A;
---sidebar-foreground: #FFFFFF;
-
---sidebar-primary: #1B263B;
---sidebar-primary-foreground: #FFFFFF;
-
---sidebar-accent: #1B263B;
---sidebar-accent-foreground: #FFFFFF;
-
---sidebar-border: rgba(255,255,255,0.08);
---sidebar-ring: #415A77;
+  /* ── SIDEBAR do VENDEDOR: mesmo azul escuro da logo ─────────── */
+  --sidebar: oklch(0.17 0.04 240);           /* #0D1B2A */
+  --sidebar-foreground: oklch(0.78 0.015 250);
+  --sidebar-primary: oklch(0.99 0 0);
+  --sidebar-primary-foreground: oklch(0.17 0.04 240);
+  --sidebar-accent: oklch(1 0 0 / 0.10);
+  --sidebar-accent-foreground: oklch(0.99 0 0);
+  --sidebar-border: oklch(1 0 0 / 0.07);
+  --sidebar-ring: oklch(0.99 0 0 / 0.3);
 }
 
 .dark {
-  --background: oklch(0.18 0.03 145);
+  --background: oklch(0.14 0.03 240);
   --foreground: oklch(0.96 0.015 80);
-  --card: oklch(0.22 0.04 145);
+  --card: oklch(0.18 0.04 240);
   --card-foreground: oklch(0.96 0.015 80);
-  --popover: oklch(0.22 0.04 145);
+  --popover: oklch(0.18 0.04 240);
   --popover-foreground: oklch(0.96 0.015 80);
   --primary: oklch(0.78 0.13 80);
-  --primary-foreground: oklch(0.22 0.04 145);
-  --secondary: oklch(0.32 0.07 145);
+  --primary-foreground: oklch(0.17 0.04 240);
+  --secondary: oklch(0.25 0.04 240);
   --secondary-foreground: oklch(0.96 0.015 80);
-  --muted: oklch(0.28 0.04 145);
+  --muted: oklch(0.22 0.03 240);
   --muted-foreground: oklch(0.72 0.02 80);
-  --accent: oklch(0.28 0.04 145);
+  --accent: oklch(0.22 0.03 240);
   --accent-foreground: oklch(0.96 0.015 80);
   --destructive: oklch(0.65 0.22 28);
   --destructive-foreground: oklch(0.98 0 0);
@@ -132,14 +130,14 @@
   --gold-foreground: oklch(0.22 0.04 145);
   --success: oklch(0.65 0.14 150);
   --success-foreground: oklch(0.18 0.03 145);
-  --sidebar: oklch(0.14 0.03 145);
+  --sidebar: oklch(0.12 0.03 240);
   --sidebar-foreground: oklch(0.92 0.02 80);
-  --sidebar-primary: oklch(0.62 0.14 45);
-  --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.22 0.04 145);
+  --sidebar-primary: oklch(0.78 0.13 80);
+  --sidebar-primary-foreground: oklch(0.17 0.04 240);
+  --sidebar-accent: oklch(0.18 0.04 240);
   --sidebar-accent-foreground: oklch(0.96 0.015 80);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.62 0.14 45);
+  --sidebar-ring: oklch(0.78 0.13 80);
 }
 
 @layer base {
@@ -157,7 +155,6 @@
   }
   .tabular-nums { font-variant-numeric: tabular-nums; }
 }
-
 
 @utility gradient-earth {
   background-image: linear-gradient(135deg, var(--color-primary), var(--color-earth));
