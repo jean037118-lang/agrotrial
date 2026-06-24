@@ -1,12 +1,7 @@
 /**
  * AdminSidebar.tsx
- * Sidebar exclusiva do painel administrativo do AgroTrial.
- *
- * Alterações visuais:
- *   - Logo com fundo branco (bg-white) ✓
- *   - Itens de menu ativos/hover em azul escuro #0D1B2A (cor da logo)
- *   - Badge "Administrador" e ícone ShieldCheck em azul escuro
- *   - Ícone colapsado em azul escuro em vez do verde padrão
+ * Sidebar com fundo azul escuro #0D1B2A (mesma cor da logo).
+ * Logo maior, sem fundo branco. Texto e ícones em branco.
  */
 
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
@@ -24,9 +19,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import logo from "@/assets/agrotrial-logo.png";
 import { useProfile } from "@/hooks/useProfile";
-
-// Azul escuro da logo AgroTrial
-const BRAND = "#0D1B2A";
 
 const ADMIN_ITEMS = [
   { title: "Dashboard",  url: "/admin/dashboard", icon: LayoutDashboard },
@@ -52,33 +44,29 @@ export function AdminSidebar() {
   }
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center px-2 py-3">
+    <Sidebar
+      collapsible="icon"
+      style={{ backgroundColor: "#0D1B2A", borderRight: "none" }}
+    >
+      {/* ── Header / Logo ─────────────────────────────────────────── */}
+      <SidebarHeader style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="flex items-center justify-center px-2 py-5">
           {collapsed ? (
-            /* Ícone colapsado — azul escuro da logo */
-            <div
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-white"
-              style={{ backgroundColor: BRAND }}
-            >
-              <Sprout className="h-4 w-4" strokeWidth={2.5} />
+            <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/10">
+              <Sprout className="h-5 w-5 text-white" strokeWidth={2.5} />
             </div>
           ) : (
-            <div className="space-y-1 px-1">
-              {/* Logo com fundo branco */}
-              <div className="rounded-xl bg-white px-3 py-2 shadow-sm">
-                <img src={logo} alt="AgroTrial" className="h-6 w-auto" />
-              </div>
-              {/* Badge Administrador — azul escuro */}
-              <div className="flex items-center gap-1.5 px-1">
-                <ShieldCheck
-                  className="h-3 w-3"
-                  style={{ color: BRAND }}
-                />
-                <span
-                  className="text-[10px] font-bold uppercase tracking-widest"
-                  style={{ color: BRAND }}
-                >
+            <div className="flex flex-col items-center gap-2">
+              {/* Logo sem fundo, maior */}
+              <img
+                src={logo}
+                alt="AgroTrial"
+                className="h-10 w-auto"
+                style={{ filter: "brightness(0) invert(1)" }}
+              />
+              <div className="flex items-center gap-1">
+                <ShieldCheck className="h-3 w-3 text-white/60" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white/60">
                   Administrador
                 </span>
               </div>
@@ -87,33 +75,42 @@ export function AdminSidebar() {
         </div>
       </SidebarHeader>
 
+      {/* ── Menu ──────────────────────────────────────────────────── */}
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/40">
+          <SidebarGroupLabel
+            style={{ color: "rgba(255,255,255,0.35)" }}
+            className="text-[10px] font-bold uppercase tracking-widest"
+          >
             Gestão
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {ADMIN_ITEMS.map((item) => {
-                const active = pathname === item.url || pathname.startsWith(item.url + "/");
+                const active =
+                  pathname === item.url || pathname.startsWith(item.url + "/");
                 return (
                   <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton
                       asChild
                       isActive={active}
-                      /* Item ativo: fundo azul escuro suave + texto/ícone azul escuro */
-                      style={active ? {
-                        backgroundColor: `${BRAND}15`,
-                        color: BRAND,
-                        fontWeight: 600,
-                      } : undefined}
-                      className={!active
-                        ? "hover:bg-[#0D1B2A]/10 hover:text-[#0D1B2A]"
-                        : ""
+                      style={
+                        active
+                          ? {
+                              backgroundColor: "rgba(255,255,255,0.12)",
+                              color: "#ffffff",
+                              fontWeight: 600,
+                              borderRadius: "8px",
+                            }
+                          : {
+                              color: "rgba(255,255,255,0.65)",
+                              borderRadius: "8px",
+                            }
                       }
+                      className="transition-colors hover:!bg-white/10 hover:!text-white"
                     >
                       <Link to={item.url} className="flex items-center gap-3">
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className="h-4 w-4 shrink-0" />
                         {!collapsed && (
                           <span className="text-sm">{item.title}</span>
                         )}
@@ -127,13 +124,14 @@ export function AdminSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border">
+      {/* ── Rodapé ────────────────────────────────────────────────── */}
+      <SidebarFooter style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
         {!collapsed && profile && (
           <div className="px-3 py-2">
-            <p className="truncate text-xs font-semibold text-sidebar-foreground">
+            <p className="truncate text-xs font-semibold text-white">
               {profile.full_name ?? "Administrador"}
             </p>
-            <p className="truncate text-[10px] text-sidebar-foreground/50">
+            <p className="truncate text-[10px] text-white/40">
               {profile.email ?? ""}
             </p>
           </div>
@@ -142,10 +140,13 @@ export function AdminSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={signOut}
-              className="text-sidebar-foreground/70 hover:bg-destructive/10 hover:text-destructive"
+              style={{ color: "rgba(255,255,255,0.5)", borderRadius: "8px" }}
+              className="hover:!bg-red-500/20 hover:!text-red-400 transition-colors"
             >
               <LogOut className="h-4 w-4" />
-              {!collapsed && <span className="text-sm font-medium">Sair</span>}
+              {!collapsed && (
+                <span className="text-sm font-medium">Sair</span>
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
