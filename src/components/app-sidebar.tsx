@@ -60,21 +60,21 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       {/* Logo */}
-      <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center px-2 py-3">
-          {collapsed ? (
-  <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/10">
-    <Sprout className="h-4 w-4 text-white" strokeWidth={2.5} />
-  </div>
-) : (
-  <div className="flex justify-center w-full py-4">
-    <img
-      src={logo}
-      alt="AgroTrial"
-      className="w-full max-w-[170px] h-auto object-contain"
-    />
-  </div>
-)}
+      <SidebarHeader style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+  <div className="flex items-center justify-center px-3 py-5">
+    {collapsed ? (
+      <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/10">
+        <Sprout className="h-5 w-5 text-white" strokeWidth={2.5} />
+      </div>
+    ) : (
+      <div className="flex flex-col items-center gap-2 w-full">
+        <img
+          src={logo}
+          alt="AgroTrial"
+          className="w-full max-w-[170px] h-auto object-contain"
+        />
+      </div>
+    )}
       </SidebarHeader>
 
       <SidebarContent>
